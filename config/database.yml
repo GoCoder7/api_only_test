@@ -19,7 +19,6 @@ default: &default
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
-
 development:
   <<: *default
   database: api_only_development
@@ -81,9 +80,7 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: api_only_production
-    username: api_only
-    password: <%= ENV["API_ONLY_DATABASE_PASSWORD"] %>
+    # DATABASE_URL 환경변수 설정(compose파일)으로 인해 생략
   cache:
     <<: *primary_production
     database: api_only_production_cache

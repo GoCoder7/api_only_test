@@ -1,0 +1,37 @@
+name: api_only
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # required
+      POSTGRES_USER: ${POSTGRES_USER} # optional. Defaults to "postgres"
+      POSTGRES_DB: ${POSTGRES_DB} # optional. Defaults to `POSTGRES_USER` env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      RAILS_ENV: ${RAILS_ENV}
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      RAILS_LOG_TO_STDOUT: "true"
+    depends_on:
+      db: # if specified, wait for the `db` service to be healthy
+        condition: service_healthy
+    volumes:
+      - rails_storage:/rails/storage
+
+volumes:
+  postgres_data:
+  rails_storage:
